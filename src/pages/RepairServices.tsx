@@ -18,7 +18,6 @@ const RepairServices = () => {
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   const phoneNumber = import.meta.env.VITE_PHONE_NUMBER;
-  const email = import.meta.env.VITE_EMAIL;
 
   const services = [
     {
@@ -371,13 +370,6 @@ const RepairServices = () => {
                 >
                   <Phone className="h-5 w-5" />
                   <span>Call Now: {phoneNumber}</span>
-                </a>
-                <a
-                  href={`mailto:${repairEmail}`}
-                  className="border border-blue-600 text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-600 hover:text-white transition-colors flex items-center space-x-2"
-                >
-                  <Mail className="h-5 w-5" />
-                  <span>Email: {repairEmail}</span>
                 </a>
               </div>
             </div>
