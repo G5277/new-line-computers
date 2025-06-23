@@ -26,7 +26,7 @@ const Services = () => {
       icon: Network,
       title: 'Networking Solutions',
       description: 'Complete networking setup for offices and homes',
-      features: ['Network Setup', 'WiFi Installation', 'Server Configuration', 'Security Systems']
+      features: ['Network Setup', 'WiFi Installation']
     },
     {
       icon: Laptop,

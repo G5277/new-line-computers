@@ -37,7 +37,6 @@ const Footer = () => {
                 <MapPin className="h-4 w-4 text-blue-400 mt-1" />
                 <p className="text-gray-400">
                   15, New Line Computers, Jain School Wali Gali, Mansa, Punjab - 151505<br />
-                  Mansa, Punjab - 151505
                 </p>
               </div>
             </div>

@@ -19,8 +19,8 @@ const Hero = () => {
                 Your Local Tech Partner Since 1998
               </p>
               <p className="text-lg text-blue-100 max-w-lg">
-                Trusted by thousands for computer hardware sales, expert repairs, 
-                custom PC building, and professional networking solutions.
+                Trusted by thousands for Computer Hardware sales, Expert Repairs, 
+                Custom PC Building and CCTV Installation.
               </p>
             </div>
             

@@ -62,12 +62,7 @@ const LocationMap = () => {
                   <div>
                     <h4 className="font-semibold text-gray-900">Address</h4>
                     <p className="text-gray-600">
-                      {businessAddress.split(', ').map((line, index, array) => (
-                        <span key={index}>
-                          {line}
-                          {index < array.length - 1 && <br />}
-                        </span>
-                      ))}
+                      {businessAddress}
                     </p>
                   </div>
                 </div>
@@ -89,8 +84,8 @@ const LocationMap = () => {
                   <div>
                     <h4 className="font-semibold text-gray-900">Store Hours</h4>
                     <div className="text-gray-600 space-y-1">
-                      <p>Monday - Saturday: 10:00 AM - 8:00 PM</p>
-                      <p>Sunday: 11:00 AM - 6:00 PM</p>
+                      <p>Monday - Saturday: 9:00 AM - 7:00 PM</p>
+                      <p>Sunday: 10:00 AM - 4:00 PM</p>
                     </div>
                   </div>
                 </div>

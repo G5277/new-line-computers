@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Wrench, Laptop, Monitor, Printer, Smartphone, HardDrive, CheckCircle, Phone, Mail } from 'lucide-react';
+import { Wrench, Laptop, Monitor, Printer, Smartphone, HardDrive, CheckCircle, Phone, Mail, AlertCircle } from 'lucide-react';
+import { sendRepairRequestEmail } from '../utils/emailService';
+import { addRepairRequest } from '../utils/dataStorage';
+import type { RepairFormData } from '../utils/emailService';
 
 const RepairServices = () => {
-  const phoneNumber = import.meta.env.VITE_PHONE_NUMBER;
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<RepairFormData>({
     name: '',
     phone: '',
     email: '',
@@ -11,6 +13,12 @@ const RepairServices = () => {
     issue: '',
     urgency: 'normal'
   });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
+  const phoneNumber = import.meta.env.VITE_PHONE_NUMBER;
+  const email = import.meta.env.VITE_EMAIL;
 
   const services = [
     {
@@ -33,9 +41,9 @@ const RepairServices = () => {
     },
     {
       icon: Smartphone,
-      title: 'Mobile Repair',
-      description: 'Expert mobile phone and tablet repair services with genuine parts and warranty.',
-      features: ['Screen Repair', 'Battery Replacement', 'Charging Port Fix', 'Software Issues', 'Water Damage', 'Data Recovery']
+      title: 'CCTV Installation',
+      description: 'Repair and installation with genuine parts and warranty.',
+      features: ['CCTV Camera Installation', 'NVR Setup', 'Remote Monitoring', 'Maintenance', 'Troubleshooting', 'System Upgrades']
     },
     {
       icon: HardDrive,
@@ -59,19 +67,46 @@ const RepairServices = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log('Form submitted:', formData);
-    alert('Repair request submitted successfully! We will contact you soon.');
-    setFormData({
-      name: '',
-      phone: '',
-      email: '',
-      deviceType: '',
-      issue: '',
-      urgency: 'normal'
-    });
+    setIsSubmitting(true);
+    setSubmitStatus('idle');
+
+    try {
+      // Validate form data
+      if (!formData.name || !formData.phone || !formData.deviceType || !formData.issue) {
+        throw new Error('Please fill in all required fields');
+      }
+
+      // Save to local storage
+      addRepairRequest(formData);
+
+      // Send email notification
+      const emailSent = await sendRepairRequestEmail(formData);
+
+      if (emailSent) {
+        setSubmitStatus('success');
+      } else {
+        // Still show success even if email fails, since data is saved locally
+        setSubmitStatus('success');
+        console.warn('Email notification failed, but repair request was saved locally');
+      }
+
+      // Reset form
+      setFormData({
+        name: '',
+        phone: '',
+        email: '',
+        deviceType: '',
+        issue: '',
+        urgency: 'normal'
+      });
+    } catch (error) {
+      console.error('Form submission error:', error);
+      setSubmitStatus('error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -146,6 +181,22 @@ const RepairServices = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           <div className="bg-white rounded-xl shadow-lg p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Request Repair Service</h2>
+            
+            {/* Status Messages */}
+            {submitStatus === 'success' && (
+              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center space-x-3">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                <p className="text-green-800">Repair request submitted successfully! We'll contact you soon.</p>
+              </div>
+            )}
+
+            {submitStatus === 'error' && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center space-x-3">
+                <AlertCircle className="h-5 w-5 text-red-600" />
+                <p className="text-red-800">Failed to submit request. Please try again or call us directly.</p>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -159,7 +210,8 @@ const RepairServices = () => {
                     value={formData.name}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    disabled={isSubmitting}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                   />
                 </div>
                 <div>
@@ -173,7 +225,8 @@ const RepairServices = () => {
                     value={formData.phone}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    disabled={isSubmitting}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -188,7 +241,8 @@ const RepairServices = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  disabled={isSubmitting}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                 />
               </div>
 
@@ -203,7 +257,8 @@ const RepairServices = () => {
                     value={formData.deviceType}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    disabled={isSubmitting}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                   >
                     <option value="">Select Device Type</option>
                     <option value="laptop">Laptop</option>
@@ -223,7 +278,8 @@ const RepairServices = () => {
                     name="urgency"
                     value={formData.urgency}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    disabled={isSubmitting}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                   >
                     <option value="normal">Normal (3-5 days)</option>
                     <option value="urgent">Urgent (1-2 days)</option>
@@ -243,16 +299,25 @@ const RepairServices = () => {
                   value={formData.issue}
                   onChange={handleInputChange}
                   required
+                  disabled={isSubmitting}
                   placeholder="Please describe the issue you're experiencing with your device..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                 ></textarea>
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                disabled={isSubmitting}
+                className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
               >
-                Submit Repair Request
+                {isSubmitting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <span>Submitting...</span>
+                  </>
+                ) : (
+                  <span>Submit Repair Request</span>
+                )}
               </button>
             </form>
           </div>
@@ -308,11 +373,11 @@ const RepairServices = () => {
                   <span>Call Now: {phoneNumber}</span>
                 </a>
                 <a
-                  href="mailto:repairs@newlinecomputers.com"
+                  href={`mailto:${repairEmail}`}
                   className="border border-blue-600 text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-600 hover:text-white transition-colors flex items-center space-x-2"
                 >
                   <Mail className="h-5 w-5" />
-                  <span>Email: repairs@newlinecomputers.com</span>
+                  <span>Email: {repairEmail}</span>
                 </a>
               </div>
             </div>

@@ -1,72 +1,36 @@
-import React, { useState } from 'react';
-import { Lock, Eye, EyeOff, Plus, Edit, Trash2, Save, X, Star, Package, Wrench, BarChart3, Upload, Image } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Lock, Eye, EyeOff, Plus, Edit, Trash2, Save, X, Star, Package, Wrench, BarChart3, Users, Upload, Image, Download, FileUp, AlertCircle, CheckCircle } from 'lucide-react';
+import { uploadToCloudinary, getOptimizedImageUrl } from '../utils/cloudinaryService';
+import { saveProducts, loadProducts, addProduct, updateProduct, deleteProduct, saveRepairRequests, loadRepairRequests, addRepairRequest, exportData, importData } from '../utils/dataStorage';
+import type { Product, RepairRequest } from '../utils/dataStorage';
 
 const AdminDashboard = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loginData, setLoginData] = useState({ username: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState('products');
-  const [editingProduct, setEditingProduct] = useState(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showAddProduct, setShowAddProduct] = useState(false);
 
-  // Mock data
-  const [products, setProducts] = useState([
-    {
-      id: 1,
-      name: 'Dell OptiPlex 7090',
-      category: 'desktop',
-      price: 45000,
-      originalPrice: 52000,
-      description: 'Intel i5 processor, 8GB RAM, 256GB SSD, Windows 11 Pro',
-      featured: true,
-      inStock: true,
-      image: 'https://images.pexels.com/photos/7319337/pexels-photo-7319337.jpeg'
-    },
-    {
-      id: 2,
-      name: 'HP Pavilion Gaming Laptop',
-      category: 'laptop',
-      price: 65000,
-      originalPrice: 75000,
-      description: 'AMD Ryzen 5, 16GB RAM, GTX 1650, 512GB SSD',
-      featured: true,
-      inStock: true,
-      image: 'https://images.pexels.com/photos/205421/pexels-photo-205421.jpeg'
-    }
-  ]);
+  const adminUsername = import.meta.env.VITE_ADMIN_USERNAME || 'admin';
+  const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
+  const phoneNumber = import.meta.env.VITE_PHONE_NUMBER || '+91-9876543210';
 
-  const [repairRequests] = useState([
-    {
-      id: 1,
-      name: 'John Doe',
-      phone: '+91-9876543210',
-      email: 'john@example.com',
-      deviceType: 'laptop',
-      issue: 'Screen flickering and not booting properly',
-      urgency: 'urgent',
-      date: '2024-01-15',
-      status: 'pending'
-    },
-    {
-      id: 2,
-      name: 'Jane Smith',
-      phone: '+91-9876543211',
-      email: 'jane@example.com',
-      deviceType: 'desktop',
-      issue: 'Computer won\'t turn on after power outage',
-      urgency: 'normal',
-      date: '2024-01-14',
-      status: 'in-progress'
-    }
-  ]);
+  // Load data from localStorage
+  const [products, setProducts] = useState<Product[]>([]);
+  const [repairRequests, setRepairRequests] = useState<RepairRequest[]>([]);
+
+  useEffect(() => {
+    setProducts(loadProducts());
+    setRepairRequests(loadRepairRequests());
+  }, []);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simple demo login - in production, implement proper authentication
-    if (loginData.username === 'admin' && loginData.password === 'admin123') {
+    if (loginData.username === adminUsername && loginData.password === adminPassword) {
       setIsLoggedIn(true);
     } else {
-      alert('Invalid credentials. Use admin/admin123 for demo.');
+      alert(`Invalid credentials. Use ${adminUsername}/${adminPassword} for demo.`);
     }
   };
 
@@ -75,26 +39,58 @@ const AdminDashboard = () => {
     setLoginData({ username: '', password: '' });
   };
 
-  const handleProductSave = (productData: any) => {
-    if (editingProduct) {
-      setProducts(products.map(p => p.id === editingProduct.id ? { ...productData, id: editingProduct.id } : p));
-      setEditingProduct(null);
-    } else {
-      setProducts([...products, { ...productData, id: Date.now() }]);
-      setShowAddProduct(false);
+  const handleProductSave = async (productData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => {
+    try {
+      if (editingProduct) {
+        const updated = updateProduct(editingProduct.id, productData);
+        if (updated) {
+          setProducts(loadProducts());
+          setEditingProduct(null);
+        }
+      } else {
+        const newProduct = addProduct(productData);
+        setProducts(loadProducts());
+        setShowAddProduct(false);
+      }
+    } catch (error) {
+      console.error('Failed to save product:', error);
+      alert('Failed to save product. Please try again.');
     }
   };
 
   const handleProductDelete = (id: number) => {
     if (confirm('Are you sure you want to delete this product?')) {
-      setProducts(products.filter(p => p.id !== id));
+      const success = deleteProduct(id);
+      if (success) {
+        setProducts(loadProducts());
+      }
     }
   };
 
   const toggleFeatured = (id: number) => {
-    setProducts(products.map(p => 
-      p.id === id ? { ...p, featured: !p.featured } : p
-    ));
+    const product = products.find(p => p.id === id);
+    if (product) {
+      updateProduct(id, { featured: !product.featured });
+      setProducts(loadProducts());
+    }
+  };
+
+  const handleDataExport = () => {
+    exportData();
+  };
+
+  const handleDataImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const success = await importData(file);
+      if (success) {
+        setProducts(loadProducts());
+        setRepairRequests(loadRepairRequests());
+        alert('Data imported successfully!');
+      } else {
+        alert('Failed to import data. Please check the file format.');
+      }
+    }
   };
 
   if (!isLoggedIn) {
@@ -157,6 +153,14 @@ const AdminDashboard = () => {
                 Login to Dashboard
               </button>
             </form>
+
+            <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <p className="text-sm text-blue-800 text-center font-medium">
+                <strong>Demo Login:</strong><br />
+                Username: {adminUsername}<br />
+                Password: {adminPassword}
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -173,12 +177,31 @@ const AdminDashboard = () => {
               <h1 className="text-3xl font-bold text-gray-900">Store Management</h1>
               <p className="text-gray-600">Welcome back! Manage your products and services</p>
             </div>
-            <button
-              onClick={handleLogout}
-              className="bg-red-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors"
-            >
-              Logout
-            </button>
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={handleDataExport}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center space-x-2"
+              >
+                <Download className="h-4 w-4" />
+                <span>Export Data</span>
+              </button>
+              <label className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center space-x-2 cursor-pointer">
+                <FileUp className="h-4 w-4" />
+                <span>Import Data</span>
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={handleDataImport}
+                  className="hidden"
+                />
+              </label>
+              <button
+                onClick={handleLogout}
+                className="bg-red-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors"
+              >
+                Logout
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -277,7 +300,7 @@ const AdminDashboard = () => {
                 <div key={product.id} className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="relative">
                     <img
-                      src={product.image}
+                      src={getOptimizedImageUrl(product.image, { width: 400, height: 200 })}
                       alt={product.name}
                       className="w-full h-48 object-cover"
                     />
@@ -347,6 +370,20 @@ const AdminDashboard = () => {
                 </div>
               ))}
             </div>
+
+            {products.length === 0 && (
+              <div className="text-center py-12">
+                <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No products yet</h3>
+                <p className="text-gray-600 mb-4">Start by adding your first product</p>
+                <button
+                  onClick={() => setShowAddProduct(true)}
+                  className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                >
+                  Add Your First Product
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -362,7 +399,7 @@ const AdminDashboard = () => {
                       <h3 className="font-semibold text-gray-900 mb-2">{request.name}</h3>
                       <p className="text-gray-600 text-sm mb-1">📞 {request.phone}</p>
                       <p className="text-gray-600 text-sm mb-1">✉️ {request.email}</p>
-                      <p className="text-gray-600 text-sm">📅 {request.date}</p>
+                      <p className="text-gray-600 text-sm">📅 {new Date(request.createdAt).toLocaleDateString()}</p>
                     </div>
                     <div>
                       <div className="mb-2">
@@ -384,7 +421,8 @@ const AdminDashboard = () => {
                       <span className={`px-3 py-1 rounded-full text-xs font-medium text-center ${
                         request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                         request.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
-                        'bg-green-100 text-green-800'
+                        request.status === 'completed' ? 'bg-green-100 text-green-800' :
+                        'bg-gray-100 text-gray-800'
                       }`}>
                         {request.status.replace('-', ' ').toUpperCase()}
                       </span>
@@ -399,6 +437,14 @@ const AdminDashboard = () => {
                 </div>
               ))}
             </div>
+
+            {repairRequests.length === 0 && (
+              <div className="text-center py-12">
+                <Wrench className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No repair requests yet</h3>
+                <p className="text-gray-600">Repair requests will appear here when customers submit them</p>
+              </div>
+            )}
           </div>
         )}
 
@@ -418,8 +464,12 @@ const AdminDashboard = () => {
   );
 };
 
-// Enhanced Product Modal Component with Image Upload
-const ProductModal = ({ product, onSave, onClose }: any) => {
+// Enhanced Product Modal Component with Cloudinary Integration
+const ProductModal = ({ product, onSave, onClose }: {
+  product: Product | null;
+  onSave: (data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  onClose: () => void;
+}) => {
   const [formData, setFormData] = useState({
     name: product?.name || '',
     category: product?.category || 'desktop',
@@ -434,29 +484,31 @@ const ProductModal = ({ product, onSave, onClose }: any) => {
   const [imagePreview, setImagePreview] = useState(product?.image || '');
   const [dragActive, setDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [uploadError, setUploadError] = useState('');
 
-  const handleImageUpload = (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
-      alert('Image size should be less than 5MB');
-      return;
-    }
-
+  const handleImageUpload = async (file: File) => {
     setUploading(true);
-    
-    // Create a preview URL
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const imageUrl = e.target?.result as string;
-      setImagePreview(imageUrl);
-      setFormData({...formData, image: imageUrl});
+    setUploadStatus('idle');
+    setUploadError('');
+
+    try {
+      const result = await uploadToCloudinary(file);
+      
+      if (result.success && result.url) {
+        setImagePreview(result.url);
+        setFormData({...formData, image: result.url});
+        setUploadStatus('success');
+      } else {
+        setUploadError(result.error || 'Upload failed');
+        setUploadStatus('error');
+      }
+    } catch (error) {
+      setUploadError('Upload failed. Please try again.');
+      setUploadStatus('error');
+    } finally {
       setUploading(false);
-    };
-    reader.readAsDataURL(file);
+    }
   };
 
   const handleDrag = (e: React.DragEvent) => {
@@ -490,7 +542,7 @@ const ProductModal = ({ product, onSave, onClose }: any) => {
     onSave({
       ...formData,
       price: parseInt(formData.price.toString()),
-      originalPrice: formData.originalPrice ? parseInt(formData.originalPrice.toString()) : null
+      originalPrice: formData.originalPrice ? parseInt(formData.originalPrice.toString()) : undefined
     });
   };
 
@@ -518,10 +570,25 @@ const ProductModal = ({ product, onSave, onClose }: any) => {
               {imagePreview && (
                 <div className="mb-4">
                   <img
-                    src={imagePreview}
+                    src={getOptimizedImageUrl(imagePreview, { width: 600, height: 300 })}
                     alt="Product preview"
                     className="w-full h-48 object-cover rounded-lg border border-gray-300"
                   />
+                </div>
+              )}
+
+              {/* Upload Status */}
+              {uploadStatus === 'success' && (
+                <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center space-x-2">
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                  <span className="text-green-800">Image uploaded successfully!</span>
+                </div>
+              )}
+
+              {uploadStatus === 'error' && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center space-x-2">
+                  <AlertCircle className="h-5 w-5 text-red-600" />
+                  <span className="text-red-800">{uploadError}</span>
                 </div>
               )}
 
@@ -549,7 +616,7 @@ const ProductModal = ({ product, onSave, onClose }: any) => {
                   {uploading ? (
                     <div className="flex flex-col items-center">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                      <p className="text-gray-600">Uploading image...</p>
+                      <p className="text-gray-600">Uploading to Cloudinary...</p>
                     </div>
                   ) : (
                     <>
@@ -561,7 +628,10 @@ const ProductModal = ({ product, onSave, onClose }: any) => {
                           Drop your image here, or click to browse
                         </p>
                         <p className="text-sm text-gray-500 mt-2">
-                          Supports: JPG, PNG, GIF (Max 5MB)
+                          Supports: JPG, PNG, GIF (Max 10MB)
+                        </p>
+                        <p className="text-xs text-blue-600 mt-1">
+                          Images will be uploaded to Cloudinary
                         </p>
                       </div>
                       <button

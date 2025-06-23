@@ -33,7 +33,7 @@ const About = () => {
             Why Choose New Line Computers?
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            We've been serving the community since 2005, building lasting relationships 
+            We've been serving the community since 1998, building lasting relationships 
             through quality products, expert services, and genuine care for our customers.
           </p>
         </div>
@@ -62,10 +62,10 @@ const About = () => {
                 fair pricing, and customer satisfaction has earned us a loyal customer base.
               </p>
               <div className="space-y-4">
-                <div className="flex items-center space-x-3">
+                {/* <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
                   <span className="text-gray-700">Authorized dealer for major brands</span>
-                </div>
+                </div> */}
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
                   <span className="text-gray-700">Super Fast service for most repairs</span>
@@ -78,7 +78,7 @@ const About = () => {
             </div>
             <div className="relative">
               <img
-                src="https://images.pexels.com/photos/7319063/pexels-photo-7319063.jpeg?auto=compress&cs=tinysrgb&w=800"
+                src="https://drive.google.com/uc?export=view&id=1dDtiAO4XNVgDaHWz7mu7PbfpDlW7ddzp"
                 alt="Computer repair technician working"
                 className="rounded-xl shadow-lg w-full h-64 lg:h-80 object-cover"
               />

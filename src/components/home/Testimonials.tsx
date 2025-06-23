@@ -5,35 +5,31 @@ const Testimonials = () => {
   const testimonials = [
     {
       id: 1,
-      name: 'Rajesh Kumar',
-      role: 'Business Owner',
+      name: 'Professor Kainth',
+      role: 'Professor ( Kainth Coaching Centre)',
       content: 'New Line Computers set up our entire office network perfectly. Their team is professional and the after-sales support is excellent. Highly recommended!',
       rating: 5,
-      image: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop'
     },
     {
       id: 2,
-      name: 'Priya Sharma',
-      role: 'Student',
-      content: 'Got my laptop repaired here after water damage. They recovered all my data and fixed it perfectly. Very honest pricing and quick service!',
+      name: 'Manjeet Singh',
+      role: 'Guru Gobind Singh ITI Head',
+      content: 'New Line Computers set up our entire office network perfectly. Very honest pricing and quick service!',
       rating: 5,
-      image: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop'
     },
     {
       id: 3,
-      name: 'Amit Singh',
-      role: 'Gamer',
-      content: 'Built my dream gaming PC here. The team understood exactly what I needed and delivered beyond expectations. Great performance and value for money!',
+      name: 'Jashan Singh',
+      role: 'Indo Canadian IELTS Institute Head',
+      content: 'Great setup for both Listening and Speaking Labs at the institute. Great performance and value for money!',
       rating: 5,
-      image: 'https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop'
     },
     {
       id: 4,
-      name: 'Dr. Meera Patel',
-      role: 'Doctor',
-      content: 'Been buying computers from them for 10 years. Always reliable, fair prices, and genuine products. They truly care about their customers.',
+      name: 'Dr. Monika',
+      role: 'Dentist (Janak Dental Hospital Mansa)',
+      content: 'Bought Laptop from them. Always reliable, fair prices, and genuine products. They truly care about their customers.',
       rating: 5,
-      image: 'https://images.pexels.com/photos/5327921/pexels-photo-5327921.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop'
     }
   ];
 
@@ -64,11 +60,6 @@ const Testimonials = () => {
               <p className="text-gray-600 mb-6 italic">"{testimonial.content}"</p>
               
               <div className="flex items-center">
-                <img
-                  src={testimonial.image}
-                  alt={testimonial.name}
-                  className="w-12 h-12 rounded-full object-cover mr-4"
-                />
                 <div>
                   <h4 className="font-semibold text-gray-900">{testimonial.name}</h4>
                   <p className="text-sm text-gray-600">{testimonial.role}</p>
