@@ -119,13 +119,6 @@ NETLIFY_AUTH_TOKEN=your-netlify-token
 NETLIFY_SITE_ID=your-site-id
 ```
 
-**For Vercel:**
-```
-VERCEL_TOKEN=your-vercel-token
-ORG_ID=your-org-id
-PROJECT_ID=your-project-id
-```
-
 3. **Automatic Deployment:**
    - Every push to `main` branch triggers deployment
    - Pull requests are automatically tested
@@ -142,9 +135,6 @@ npm run preview
 
 # Deploy to Netlify
 netlify deploy --prod --dir=dist
-
-# Deploy to Vercel
-vercel --prod
 ```
 
 ## 📱 Admin Access
@@ -172,31 +162,11 @@ npm run lint
 npx tsc --noEmit
 ```
 
-## 🐳 Docker Commands
-
-```bash
-# Development with hot reload
-docker-compose up frontend
-
-# Production build
-docker-compose up frontend-prod
-
-# Build custom images
-docker build -f Dockerfile.dev -t newline-computers:dev .
-docker build -f Dockerfile.prod -t newline-computers:prod .
-```
-
 ## 🌍 Domain Setup
 
 ### Custom Domain on Netlify
 1. Go to Netlify dashboard
 2. Site settings → Domain management
-3. Add custom domain
-4. Update DNS records as instructed
-
-### Custom Domain on Vercel
-1. Go to Vercel dashboard
-2. Project settings → Domains
 3. Add custom domain
 4. Update DNS records as instructed
 
