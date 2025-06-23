@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Wrench, Laptop, Monitor, Printer, Smartphone, HardDrive, CheckCircle, Phone, Mail } from 'lucide-react';
 
 const RepairServices = () => {
+  const phoneNumber = import.meta.env.VITE_PHONE_NUMBER;
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -300,11 +301,11 @@ const RepairServices = () => {
               </p>
               <div className="space-y-4">
                 <a
-                  href="tel:+91-9876543210"
+                  href={`tel:${phoneNumber}`}
                   className="bg-orange-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors flex items-center space-x-2"
                 >
                   <Phone className="h-5 w-5" />
-                  <span>Call Now: +91-9876543210</span>
+                  <span>Call Now: {phoneNumber}</span>
                 </a>
                 <a
                   href="mailto:repairs@newlinecomputers.com"

@@ -22,21 +22,6 @@ echo "✅ Node.js $(node -v) detected"
 echo "📦 Installing dependencies..."
 npm install
 
-# Create environment file if it doesn't exist
-if [ ! -f .env ]; then
-    echo "📝 Creating environment file..."
-    cat > .env << EOL
-# New Line Computers Environment Variables
-VITE_PHONE_NUMBER=+91-9876543210
-VITE_EMAIL=info@newlinecomputers.com
-VITE_WHATSAPP_NUMBER=919876543210
-VITE_GOOGLE_MAPS_API_KEY=your_api_key_here
-VITE_ADMIN_USERNAME=admin
-VITE_ADMIN_PASSWORD=admin123
-EOL
-    echo "✅ Environment file created (.env)"
-fi
-
 # Make scripts executable
 chmod +x scripts/*.sh
 

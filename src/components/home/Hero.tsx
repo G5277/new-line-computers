@@ -2,6 +2,8 @@ import React from 'react';
 import { Phone, ArrowRight, Monitor, Cpu, HardDrive } from 'lucide-react';
 
 const Hero = () => {
+  const phoneNumber = import.meta.env.VITE_PHONE_NUMBER;
+
   return (
     <section className="relative bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 text-white">
       <div className="absolute inset-0 bg-black opacity-20"></div>
@@ -24,7 +26,7 @@ const Hero = () => {
             
             <div className="flex flex-col sm:flex-row gap-4">
               <a
-                href="tel:+91-9356486286"
+                href={`tel:${phoneNumber}`}
                 className="bg-orange-500 text-white px-8 py-4 rounded-lg font-semibold hover:bg-orange-600 transition-colors flex items-center justify-center space-x-2 shadow-lg"
               >
                 <Phone className="h-5 w-5" />

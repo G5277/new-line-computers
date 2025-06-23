@@ -2,6 +2,7 @@ import React from 'react';
 import { MapPin, Phone, Clock, Navigation } from 'lucide-react';
 
 const LocationMap = () => {
+  const phoneNumber = import.meta.env.VITE_PHONE_NUMBER;
   return (
     <section className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -39,8 +40,8 @@ const LocationMap = () => {
                   <div>
                     <h4 className="font-semibold text-gray-900">Address</h4>
                     <p className="text-gray-600">
-                      123 Tech Street, Computer Market<br />
-                      Patiala, Punjab - 147001
+                      Address<br />
+                      Mansa, Punjab - 151505
                     </p>
                   </div>
                 </div>
@@ -50,13 +51,8 @@ const LocationMap = () => {
                   <div>
                     <h4 className="font-semibold text-gray-900">Contact</h4>
                     <p className="text-gray-600">
-                      <a href="tel:+91-9876543210" className="hover:text-blue-600">
-                        +91-9876543210
-                      </a>
-                    </p>
-                    <p className="text-gray-600">
-                      <a href="mailto:info@newlinecomputers.com" className="hover:text-blue-600">
-                        info@newlinecomputers.com
+                      <a href={`tel:${phoneNumber}`} className="hover:text-blue-600">
+                        {phoneNumber}
                       </a>
                     </p>
                   </div>

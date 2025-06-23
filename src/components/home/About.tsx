@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, Users, Award, Clock } from 'lucide-react';
+import { Shield, Award, Clock } from 'lucide-react';
 
 const About = () => {
   const features = [

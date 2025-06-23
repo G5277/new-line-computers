@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, Eye, EyeOff, Plus, Edit, Trash2, Save, X, Star, Package, Wrench, BarChart3, Users, Upload, Image } from 'lucide-react';
+import { Lock, Eye, EyeOff, Plus, Edit, Trash2, Save, X, Star, Package, Wrench, BarChart3, Upload, Image } from 'lucide-react';
 
 const AdminDashboard = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -157,14 +157,6 @@ const AdminDashboard = () => {
                 Login to Dashboard
               </button>
             </form>
-
-            <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <p className="text-sm text-blue-800 text-center font-medium">
-                <strong>Demo Login:</strong><br />
-                Username: admin<br />
-                Password: admin123
-              </p>
-            </div>
           </div>
         </div>
       </div>

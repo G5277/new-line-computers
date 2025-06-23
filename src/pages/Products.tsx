@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Search, Filter, Grid, List, Phone, Star, Tag } from 'lucide-react';
 
 const Products = () => {
+  const phoneNumber = import.meta.env.VITE_PHONE_NUMBER;
   const [viewMode, setViewMode] = useState('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -297,7 +298,7 @@ const Products = () => {
 
                 <div className="space-y-2">
                   <a
-                    href="tel:+91-9876543210"
+                    href={`tel:${phoneNumber}`}
                     className={`bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2 ${
                       !product.inStock ? 'opacity-50 cursor-not-allowed' : ''
                     }`}

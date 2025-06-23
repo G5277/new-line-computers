@@ -2,6 +2,7 @@ import React from 'react';
 import { Monitor, Wrench, Cpu, Network, Laptop, Printer } from 'lucide-react';
 
 const Services = () => {
+  const phoneNumber = import.meta.env.VITE_PHONE_NUMBER;
   const services = [
     {
       icon: Monitor,
@@ -71,7 +72,7 @@ const Services = () => {
               </ul>
               <div className="mt-6">
                 <a
-                  href="tel:+91-9876543210"
+                  href={`tel:${phoneNumber}`}
                   className="text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors"
                 >
                   Call for Details →

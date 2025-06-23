@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { MapPin, Phone, Mail, Clock, Send, MessageCircle, Navigation } from 'lucide-react';
 
-const Contact = () => {
+const Contact = () => {    
+  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER;
+  const phoneNumber = import.meta.env.VITE_PHONE_NUMBER;
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -58,8 +60,8 @@ const Contact = () => {
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-1">Phone</h3>
                     <p className="text-gray-600">
-                      <a href="tel:+91-9876543210" className="hover:text-blue-600 transition-colors">
-                        +91-9876543210
+                      <a href={`tel:${phoneNumber}`} className="hover:text-blue-600 transition-colors">
+                        {phoneNumber}
                       </a>
                     </p>
                     <p className="text-sm text-gray-500">Available 24/7 for emergencies</p>
@@ -118,14 +120,14 @@ const Contact = () => {
               <h3 className="text-xl font-bold mb-6">Quick Actions</h3>
               <div className="space-y-4">
                 <a
-                  href="tel:+91-9876543210"
+                  href={`tel:${phoneNumber}`}
                   className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-4 flex items-center space-x-3 hover:bg-opacity-30 transition-colors"
                 >
                   <Phone className="h-5 w-5" />
                   <span>Call for Immediate Support</span>
                 </a>
                 <a
-                  href="https://wa.me/919876543210"
+                  href={`https://wa.me/${whatsappNumber}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-4 flex items-center space-x-3 hover:bg-opacity-30 transition-colors"

@@ -2,6 +2,7 @@ import React from 'react';
 import { Star, Phone, Tag } from 'lucide-react';
 
 const FeaturedProducts = () => {
+    const phoneNumber = import.meta.env.VITE_PHONE_NUMBER;
   const products = [
     {
       id: 1,
@@ -138,7 +139,7 @@ const FeaturedProducts = () => {
 
                 <div className="flex space-x-2">
                   <a
-                    href="tel:+91-9876543210"
+                    href={`tel:${phoneNumber}`}
                     className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
                   >
                     <Phone className="h-4 w-4" />
