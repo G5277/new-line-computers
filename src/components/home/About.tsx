@@ -78,9 +78,9 @@ const About = () => {
             </div>
             <div className="relative">
               <img
-                src="https://drive.google.com/uc?export=view&id=1dDtiAO4XNVgDaHWz7mu7PbfpDlW7ddzp"
+                src="https://res.cloudinary.com/deufcxt62/image/upload/v1750698779/papa_ji_lmicjq.jpg"
                 alt="Computer repair technician working"
-                className="rounded-xl shadow-lg w-full h-64 lg:h-80 object-cover"
+                className="rounded-xl shadow-lg h-full lg:h-80 object-cover"
               />
             </div>
           </div>
