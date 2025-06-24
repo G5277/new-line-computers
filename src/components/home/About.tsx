@@ -8,11 +8,6 @@ const About = () => {
       title: 'Trusted & Reliable',
       description: 'Over 20 years of honest service and genuine products with warranty support.'
     },
-    // {
-    //   icon: Users,
-    //   title: 'Expert Lead',
-    //   description: 'Certified technicians with extensive experience in computer hardware and repairs.'
-    // },
     {
       icon: Award,
       title: 'Quality Assured',
@@ -37,8 +32,8 @@ const About = () => {
             through quality products, expert services, and genuine care for our customers.
           </p>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {/* Features */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
             <div key={index} className="text-center group">
               <div className="bg-blue-50 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-100 transition-colors">
