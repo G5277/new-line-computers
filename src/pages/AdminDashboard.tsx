@@ -1,4 +1,3 @@
-// src/pages/AdminDashboard.tsx
 import React, { useState, useEffect } from 'react';
 import {
   Eye, EyeOff, Plus, Edit, Trash2, Save, X, Star
@@ -6,9 +5,11 @@ import {
 import {
   addProduct,
   updateProduct,
-  deleteProduct,
-  getAllProducts
+  deleteProduct
 } from '../utils/productService';
+import { db } from '../utils/firebase';
+import { collection, getDocs } from 'firebase/firestore';
+import { uploadImageToCloudinary } from '../utils/cloudinary';
 
 interface Product {
   id: string;
@@ -17,6 +18,11 @@ interface Product {
   featured: boolean;
   image: string;
   description: string;
+  category: string;
+  originalPrice?: number;
+  rating: number;
+  isNew: boolean;
+  inStock: boolean;
 }
 
 const AdminDashboard = () => {
@@ -31,8 +37,25 @@ const AdminDashboard = () => {
   const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD;
 
   const loadProducts = async () => {
-    const data = await getAllProducts();
-    setProducts(data as Product[]);
+    const snapshot = await getDocs(collection(db, 'nlc-1'));
+    const data: Product[] = snapshot.docs.map((doc) => {
+      const raw = doc.data();
+      return {
+        id: doc.id,
+        name: String(raw.name || ''),
+        price: Number(raw.price?.toString().replace(/[₹,]/g, '') || 0),
+        featured: Boolean(raw.featured),
+        image: String(raw.image || ''),
+        description: String(raw.description || ''),
+        category: String(raw.category || ''),
+        originalPrice: raw.originalPrice ? Number(raw.originalPrice.toString().replace(/[₹,]/g, '')) : undefined,
+        rating: Number(raw.rating || 0),
+        isNew: Boolean(raw.isNew),
+        inStock: raw.inStock !== undefined ? Boolean(raw.inStock) : true,
+      };
+    });
+    setProducts(data);
+    console.log('✅ Admin loaded products:', data);
   };
 
   useEffect(() => {
@@ -157,6 +180,10 @@ const AdminDashboard = () => {
         ))}
       </div>
 
+      {products.length === 0 && (
+        <p className="text-center text-gray-500 mt-6">No products found.</p>
+      )}
+
       {(editingProduct || showAddProduct) && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded shadow max-w-lg w-full relative">
@@ -174,53 +201,54 @@ const AdminDashboard = () => {
               </button>
             </div>
             <form
-              onSubmit={e => {
+              onSubmit={async e => {
                 e.preventDefault();
-                const form = e.currentTarget;
+                const form = e.currentTarget as HTMLFormElement;
+                console.log("🧾 Form data:", {
+                name: form.name.value,
+                price: Number(form.price.value),
+                originalPrice: Number(form.originalPrice.value),
+                category: form.category.value,
+                image: await uploadImageToCloudinary(form.image.files[0]),
+                description: form.description.value,
+                rating: Number(form.rating.value),
+                isNew: form.isNew.checked,
+                inStock: form.inStock.checked,
+                featured: form.featured.checked
+              });
                 handleProductSave({
                   name: form.name.value,
                   price: Number(form.price.value),
-                  image: form.image.value,
+                  originalPrice: Number(form.originalPrice.value),
+                  category: form.category.value,
+                  image: await uploadImageToCloudinary(form.image.files[0]),
                   description: form.description.value,
+                  rating: Number(form.rating.value),
+                  isNew: form.isNew.checked,
+                  inStock: form.inStock.checked,
                   featured: form.featured.checked
                 });
                 form.reset();
               }}
               className="space-y-4"
             >
-              <input
-                name="name"
-                defaultValue={editingProduct?.name || ''}
-                placeholder="Product name"
-                className="w-full p-2 border rounded"
-                required
-              />
-              <input
-                name="price"
-                type="number"
-                defaultValue={editingProduct?.price || ''}
-                placeholder="Price"
-                className="w-full p-2 border rounded"
-                required
-              />
-              <input
-                name="image"
-                defaultValue={editingProduct?.image || ''}
-                placeholder="Image URL"
-                className="w-full p-2 border rounded"
-              />
-              <textarea
-                name="description"
-                defaultValue={editingProduct?.description || ''}
-                placeholder="Description"
-                className="w-full p-2 border rounded"
-              />
+              <input name="name" defaultValue={editingProduct?.name || ''} placeholder="Product name" className="w-full p-2 border rounded" required />
+              <input name="price" type="number" defaultValue={editingProduct?.price || ''} placeholder="Price" className="w-full p-2 border rounded" required />
+              <input name="originalPrice" type="number" defaultValue={editingProduct?.originalPrice || ''} placeholder="Original Price" className="w-full p-2 border rounded" />
+              <input name="category" defaultValue={editingProduct?.category || ''} placeholder="Category" className="w-full p-2 border rounded" required />
+              <input name="image" type="file" className="w-full p-2 border rounded" placeholder='Image' required />
+              <input name="rating" type="number" defaultValue={editingProduct?.rating || 0} placeholder="Rating (0-5)" className="w-full p-2 border rounded" />
+              <textarea name="description" defaultValue={editingProduct?.description || ''} placeholder="Description" className="w-full p-2 border rounded" />
               <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name="featured"
-                  defaultChecked={editingProduct?.featured || false}
-                />
+                <input type="checkbox" name="isNew" defaultChecked={editingProduct?.isNew || false} />
+                <span>New Arrival</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <input type="checkbox" name="inStock" defaultChecked={editingProduct?.inStock || true} />
+                <span>In Stock</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <input type="checkbox" name="featured" defaultChecked={editingProduct?.featured || false} />
                 <span>Featured Product</span>
               </label>
               <div className="flex justify-end">
