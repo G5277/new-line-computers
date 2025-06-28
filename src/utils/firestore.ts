@@ -1,26 +1,56 @@
-// src/utils/firestore.ts
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import {
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+} from 'firebase/firestore';
 import { db } from './firebase';
 
-export const getProducts = async () => {
+// Define the Product interface
+export interface Product {
+  name: string;
+  price: number;
+  description?: string;
+  category?: string;
+  stock?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// Get all products from Firestore
+export const getProducts = async (): Promise<(Product & { id: string })[]> => {
   const snapshot = await getDocs(collection(db, 'products'));
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  return snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as (Product & { id: string })[];
 };
 
-export const addProduct = async (data: any) => {
+// Add a new product to Firestore
+export const addProduct = async (data: Product): Promise<void> => {
   const timestamp = new Date().toISOString();
-  return await addDoc(collection(db, 'products'), {
+  await addDoc(collection(db, 'products'), {
     ...data,
     createdAt: timestamp,
     updatedAt: timestamp,
   });
 };
 
-export const updateProduct = async (id: string, data: any) => {
+// Update an existing product by ID
+export const updateProduct = async (
+  id: string,
+  data: Partial<Product>
+): Promise<void> => {
   const productRef = doc(db, 'products', id);
-  return await updateDoc(productRef, { ...data, updatedAt: new Date().toISOString() });
+  await updateDoc(productRef, {
+    ...data,
+    updatedAt: new Date().toISOString(),
+  });
 };
 
-export const deleteProduct = async (id: string) => {
-  return await deleteDoc(doc(db, 'products', id));
+// Delete a product by ID
+export const deleteProduct = async (id: string): Promise<void> => {
+  await deleteDoc(doc(db, 'products', id));
 };
