@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Star, Phone, Tag } from 'lucide-react';
 import { db } from '../../utils/firebase';
 import { collection, getDocs } from 'firebase/firestore';
+import { Link } from 'react-router-dom';
 
 type Product = {
   id: string;
@@ -126,12 +127,10 @@ const FeaturedProducts = () => {
         </div>
 
         <div className="text-center mt-12">
-          <a
-            href="/products"
-            className="bg-gray-900 text-white px-8 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors inline-flex items-center space-x-2"
-          >
-            <span>View All Products</span>
-          </a>
+<Link to="/products" className="bg-gray-900 text-white px-8 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors inline-flex items-center space-x-2">
+  <span>View All Products</span>
+</Link>
+
         </div>
       </div>
     </section>
