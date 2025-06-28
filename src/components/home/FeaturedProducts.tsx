@@ -1,82 +1,53 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Star, Phone, Tag } from 'lucide-react';
+import { db } from '../../utils/firebase';
+import { collection, getDocs } from 'firebase/firestore';
+
+type Product = {
+  id: string;
+  name: string;
+  category: string;
+  price: string;
+  originalPrice?: string;
+  image: string;
+  description: string;
+  rating: number;
+  isNew: boolean;
+  featured: boolean;
+};
 
 const FeaturedProducts = () => {
-    const phoneNumber = import.meta.env.VITE_PHONE_NUMBER;
-  const products = [
-    {
-      id: 1,
-      name: 'Dell OptiPlex 7090',
-      category: 'Desktop',
-      price: '₹45,000',
-      originalPrice: '₹52,000',
-      image: 'https://images.pexels.com/photos/7319337/pexels-photo-7319337.jpeg?auto=compress&cs=tinysrgb&w=400',
-      description: 'Intel i5 processor, 8GB RAM, 256GB SSD, Windows 11 Pro',
-      rating: 4.8,
-      isNew: true,
-      featured: true
-    },
-    {
-      id: 2,
-      name: 'HP Pavilion Gaming Laptop',
-      category: 'Laptop',
-      price: '₹65,000',
-      originalPrice: '₹75,000',
-      image: 'https://images.pexels.com/photos/205421/pexels-photo-205421.jpeg?auto=compress&cs=tinysrgb&w=400',
-      description: 'AMD Ryzen 5, 16GB RAM, GTX 1650, 512GB SSD',
-      rating: 4.6,
-      isNew: false,
-      featured: true
-    },
-    {
-      id: 3,
-      name: 'Samsung 27" 4K Monitor',
-      category: 'Monitor',
-      price: '₹28,000',
-      originalPrice: '₹32,000',
-      image: 'https://images.pexels.com/photos/777001/pexels-photo-777001.jpeg?auto=compress&cs=tinysrgb&w=400',
-      description: '4K UHD, IPS Panel, USB-C, Height Adjustable',
-      rating: 4.9,
-      isNew: true,
-      featured: true
-    },
-    {
-      id: 4,
-      name: 'Logitech MX Master 3',
-      category: 'Accessory',
-      price: '₹8,500',
-      originalPrice: '₹9,500',
-      image: 'https://images.pexels.com/photos/2047905/pexels-photo-2047905.jpeg?auto=compress&cs=tinysrgb&w=400',
-      description: 'Wireless mouse, ergonomic design, fast scrolling',
-      rating: 4.7,
-      isNew: false,
-      featured: true
-    },
-    {
-      id: 5,
-      name: 'Used ThinkPad T480',
-      category: 'Used Laptop',
-      price: '₹35,000',
-      originalPrice: '₹40,000',
-      image: 'https://images.pexels.com/photos/18105/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=400',
-      description: 'Intel i5, 8GB RAM, 256GB SSD, Grade A condition',
-      rating: 4.5,
-      isNew: false,
-      featured: true
-    },
-    {
-      id: 6,
-      name: 'Custom Gaming PC',
-      category: 'Custom Build',
-      price: '₹85,000',
-      originalPrice: '₹95,000',
-      image: 'https://images.pexels.com/photos/2582937/pexels-photo-2582937.jpeg?auto=compress&cs=tinysrgb&w=400',
-      description: 'RTX 3070, AMD Ryzen 7, 32GB RAM, 1TB NVMe',
-      rating: 5.0,
-      isNew: true,
-      featured: true
-    }
-  ];
+  const phoneNumber = import.meta.env.VITE_PHONE_NUMBER;
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const snapshot = await getDocs(collection(db, 'nlc-1'));
+
+      const data: Product[] = snapshot.docs.map(doc => {
+        const raw = doc.data();
+
+        return {
+          id: doc.id,
+          name: String(raw.name || ''),
+          category: String(raw.category || ''),
+          price: String(raw.price || ''),
+          originalPrice: raw.originalPrice ? String(raw.originalPrice) : undefined,
+          image: String(raw.image || ''),
+          description: String(raw.description || ''),
+          rating: Number(raw.rating || 0),
+          isNew: Boolean(raw.isNew),
+          featured: Boolean(raw.featured),
+        };
+      });
+
+      const featuredProducts = data.filter(prod => prod.featured);
+      console.log('⭐ Filtered featured products:', featuredProducts);
+      setProducts(featuredProducts);
+    };
+
+    fetchProducts();
+  }, []);
 
   return (
     <section className="py-16 bg-white">
@@ -92,7 +63,10 @@ const FeaturedProducts = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {products.map((product) => (
-            <div key={product.id} className="bg-white border border-gray-200 rounded-xl shadow-lg hover:shadow-xl transition-shadow group overflow-hidden">
+            <div
+              key={product.id}
+              className="bg-white border border-gray-200 rounded-xl shadow-lg hover:shadow-xl transition-shadow group overflow-hidden"
+            >
               <div className="relative">
                 <img
                   src={product.image}

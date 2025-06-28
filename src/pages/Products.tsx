@@ -1,5 +1,21 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Search, Filter, Grid, List, Phone, Star, Tag } from 'lucide-react';
+import { db } from '../utils/firebase';
+import { collection, getDocs } from 'firebase/firestore';
+
+type Product = {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  originalPrice?: number;
+  image: string;
+  description: string;
+  rating: number;
+  isNew: boolean;
+  inStock: boolean;
+  featured?: boolean;
+};
 
 const Products = () => {
   const phoneNumber = import.meta.env.VITE_PHONE_NUMBER;
@@ -8,10 +24,9 @@ const Products = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [priceRange, setPriceRange] = useState('all');
   const [sortBy, setSortBy] = useState('name');
+  const [products, setProducts] = useState<Product[]>([]);
 
-  const categories = [
-    'all', 'desktop', 'laptop', 'monitor', 'printer', 'accessory', 'used', 'custom'
-  ];
+  const categories = ['all', 'desktop', 'laptop', 'monitor', 'printer', 'accessory', 'used', 'custom'];
 
   const priceRanges = [
     { value: 'all', label: 'All Prices' },
@@ -19,136 +34,71 @@ const Products = () => {
     { value: '10000-25000', label: '₹10,000 - ₹25,000' },
     { value: '25000-50000', label: '₹25,000 - ₹50,000' },
     { value: '50000-100000', label: '₹50,000 - ₹1,00,000' },
-    { value: '100000+', label: 'Above ₹1,00,000' }
+    { value: '100000+', label: 'Above ₹1,00,000' },
   ];
 
-  const products = [
-    {
-      id: 1,
-      name: 'Dell OptiPlex 7090',
-      category: 'desktop',
-      price: 45000,
-      originalPrice: 52000,
-      image: 'https://images.pexels.com/photos/7319337/pexels-photo-7319337.jpeg?auto=compress&cs=tinysrgb&w=400',
-      description: 'Intel i5 processor, 8GB RAM, 256GB SSD, Windows 11 Pro',
-      rating: 4.8,
-      isNew: true,
-      inStock: true
-    },
-    {
-      id: 2,
-      name: 'HP Pavilion Gaming Laptop',
-      category: 'laptop',
-      price: 65000,
-      originalPrice: 75000,
-      image: 'https://images.pexels.com/photos/205421/pexels-photo-205421.jpeg?auto=compress&cs=tinysrgb&w=400',
-      description: 'AMD Ryzen 5, 16GB RAM, GTX 1650, 512GB SSD',
-      rating: 4.6,
-      isNew: false,
-      inStock: true
-    },
-    {
-      id: 3,
-      name: 'Samsung 27" 4K Monitor',
-      category: 'monitor',
-      price: 28000,
-      originalPrice: 32000,
-      image: 'https://images.pexels.com/photos/777001/pexels-photo-777001.jpeg?auto=compress&cs=tinysrgb&w=400',
-      description: '4K UHD, IPS Panel, USB-C, Height Adjustable',
-      rating: 4.9,
-      isNew: true,
-      inStock: true
-    },
-    {
-      id: 4,
-      name: 'Logitech MX Master 3',
-      category: 'accessory',
-      price: 8500,
-      originalPrice: 9500,
-      image: 'https://images.pexels.com/photos/2047905/pexels-photo-2047905.jpeg?auto=compress&cs=tinysrgb&w=400',
-      description: 'Wireless mouse, ergonomic design, fast scrolling',
-      rating: 4.7,
-      isNew: false,
-      inStock: true
-    },
-    {
-      id: 5,
-      name: 'Used ThinkPad T480',
-      category: 'used',
-      price: 35000,
-      originalPrice: 40000,
-      image: 'https://images.pexels.com/photos/18105/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=400',
-      description: 'Intel i5, 8GB RAM, 256GB SSD, Grade A condition',
-      rating: 4.5,
-      isNew: false,
-      inStock: true
-    },
-    {
-      id: 6,
-      name: 'Custom Gaming PC',
-      category: 'custom',
-      price: 85000,
-      originalPrice: 95000,
-      image: 'https://images.pexels.com/photos/2582937/pexels-photo-2582937.jpeg?auto=compress&cs=tinysrgb&w=400',
-      description: 'RTX 3070, AMD Ryzen 7, 32GB RAM, 1TB NVMe',
-      rating: 5.0,
-      isNew: true,
-      inStock: true
-    },
-    {
-      id: 7,
-      name: 'HP LaserJet Pro',
-      category: 'printer',
-      price: 18000,
-      originalPrice: 22000,
-      image: 'https://images.pexels.com/photos/3761128/pexels-photo-3761128.jpeg?auto=compress&cs=tinysrgb&w=400',
-      description: 'Monochrome laser printer, Wi-Fi, automatic duplex',
-      rating: 4.4,
-      isNew: false,
-      inStock: false
-    },
-    {
-      id: 8,
-      name: 'MacBook Air M2',
-      category: 'laptop',
-      price: 115000,
-      originalPrice: 125000,
-      image: 'https://images.pexels.com/photos/205421/pexels-photo-205421.jpeg?auto=compress&cs=tinysrgb&w=400',
-      description: 'Apple M2 chip, 8GB RAM, 256GB SSD, Space Gray',
-      rating: 4.9,
-      isNew: true,
-      inStock: true
-    }
-  ];
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const snapshot = await getDocs(collection(db, 'nlc-1'));
+      const data: Product[] = snapshot.docs.map((doc) => {
+        const raw = doc.data();
+        return {
+          id: doc.id,
+          name: String(raw.name || ''),
+          category: String(raw.category || ''),
+          price: Number(raw.price?.toString().replace(/[₹,]/g, '') || 0),
+          originalPrice: raw.originalPrice
+            ? Number(raw.originalPrice.toString().replace(/[₹,]/g, ''))
+            : undefined,
+          image: String(raw.image || ''),
+          description: String(raw.description || ''),
+          rating: Number(raw.rating || 0),
+          isNew: Boolean(raw.isNew),
+          inStock: raw.inStock !== undefined ? Boolean(raw.inStock) : true,
+          featured: Boolean(raw.featured),
+        };
+      });
 
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
-    
-    let matchesPrice = true;
-    if (priceRange !== 'all') {
-      if (priceRange === '100000+') {
-        matchesPrice = product.price >= 100000;
-      } else {
-        const [min, max] = priceRange.split('-').map(Number);
-        matchesPrice = product.price >= min && product.price <= max;
+      console.log('📦 All products:', data);
+      setProducts(data);
+    };
+
+    fetchProducts();
+  }, []);
+
+  const filteredProducts = products
+    .filter((product) => {
+      const matchesSearch =
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesCategory =
+        selectedCategory === 'all' || product.category === selectedCategory;
+
+      let matchesPrice = true;
+      if (priceRange !== 'all') {
+        if (priceRange === '100000+') {
+          matchesPrice = product.price >= 100000;
+        } else {
+          const [min, max] = priceRange.split('-').map(Number);
+          matchesPrice = product.price >= min && product.price <= max;
+        }
       }
-    }
-    
-    return matchesSearch && matchesCategory && matchesPrice;
-  }).sort((a, b) => {
-    switch (sortBy) {
-      case 'price-low':
-        return a.price - b.price;
-      case 'price-high':
-        return b.price - a.price;
-      case 'rating':
-        return b.rating - a.rating;
-      default:
-        return a.name.localeCompare(b.name);
-    }
-  });
+
+      return matchesSearch && matchesCategory && matchesPrice;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'price-low':
+          return a.price - b.price;
+        case 'price-high':
+          return b.price - a.price;
+        case 'rating':
+          return b.rating - a.rating;
+        default:
+          return a.name.localeCompare(b.name);
+      }
+    });
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -175,12 +125,12 @@ const Products = () => {
             </div>
 
             {/* Category Filter */}
-            <select
+            <select title='Product Category'
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
             >
-              {categories.map(category => (
+              {categories.map((category) => (
                 <option key={category} value={category}>
                   {category === 'all' ? 'All Categories' : category.charAt(0).toUpperCase() + category.slice(1)}
                 </option>
@@ -188,12 +138,12 @@ const Products = () => {
             </select>
 
             {/* Price Range Filter */}
-            <select
+            <select title='Price Range'
               value={priceRange}
               onChange={(e) => setPriceRange(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
             >
-              {priceRanges.map(range => (
+              {priceRanges.map((range) => (
                 <option key={range.value} value={range.value}>
                   {range.label}
                 </option>
@@ -201,7 +151,7 @@ const Products = () => {
             </select>
 
             {/* Sort By */}
-            <select
+            <select title="Sort products"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
@@ -235,33 +185,22 @@ const Products = () => {
           <p className="text-gray-600">Showing {filteredProducts.length} products</p>
         </div>
 
-        {/* Products Grid/List */}
-        <div className={viewMode === 'grid' 
-          ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
-          : 'space-y-4'
-        }>
-          {filteredProducts.map(product => (
-            <div key={product.id} className={`bg-white rounded-xl shadow-sm hover:shadow-lg transition-shadow ${
-              viewMode === 'list' ? 'flex' : ''
-            }`}>
+        {/* Product Cards */}
+        <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6' : 'space-y-4'}>
+          {filteredProducts.map((product) => (
+            <div key={product.id} className={`bg-white rounded-xl shadow-sm hover:shadow-lg transition-shadow ${viewMode === 'list' ? 'flex' : ''}`}>
               <div className={`relative ${viewMode === 'list' ? 'w-48 flex-shrink-0' : ''}`}>
                 <img
                   src={product.image}
                   alt={product.name}
-                  className={`w-full object-cover ${
-                    viewMode === 'list' ? 'h-32 rounded-l-xl' : 'h-48 rounded-t-xl'
-                  }`}
+                  className={`w-full object-cover ${viewMode === 'list' ? 'h-32 rounded-l-xl' : 'h-48 rounded-t-xl'}`}
                 />
                 <div className="absolute top-2 left-2 flex flex-wrap gap-1">
                   {product.isNew && (
-                    <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                      New
-                    </span>
+                    <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">New</span>
                   )}
                   {!product.inStock && (
-                    <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                      Out of Stock
-                    </span>
+                    <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium">Out of Stock</span>
                   )}
                 </div>
                 <div className="absolute top-2 right-2">
@@ -285,13 +224,9 @@ const Products = () => {
 
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-2">
-                    <span className="text-lg font-bold text-gray-900">
-                      ₹{product.price.toLocaleString()}
-                    </span>
+                    <span className="text-lg font-bold text-gray-900">₹{product.price.toLocaleString()}</span>
                     {product.originalPrice && (
-                      <span className="text-sm text-gray-500 line-through">
-                        ₹{product.originalPrice.toLocaleString()}
-                      </span>
+                      <span className="text-sm text-gray-500 line-through">₹{product.originalPrice.toLocaleString()}</span>
                     )}
                   </div>
                 </div>
@@ -302,7 +237,7 @@ const Products = () => {
                     className={`bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2 ${
                       !product.inStock ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
-                    disabled={!product.inStock}
+                    onClick={(e) => !product.inStock && e.preventDefault()}
                   >
                     <Phone className="h-4 w-4" />
                     <span>{product.inStock ? 'Call to Enquire' : 'Out of Stock'}</span>

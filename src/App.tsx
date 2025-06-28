@@ -21,6 +21,8 @@ function App() {
             <Route path="/repair-services" element={<RepairServices />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="*" element={<Home />} />
+
           </Routes>
         </main>
         <Footer />

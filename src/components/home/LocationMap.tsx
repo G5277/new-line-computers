@@ -40,12 +40,7 @@ const LocationMap = () => {
                 <MapPin className="h-16 w-16 text-blue-600 mx-auto mb-4" />
                 <p className="text-gray-600 font-medium">Interactive Google Maps</p>
                 <p className="text-sm text-gray-500 mt-2">
-                  {businessAddress.split(', ').map((line, index, array) => (
-                    <span key={index}>
-                      {line}
-                      {index < array.length - 1 && <br />}
-                    </span>
-                  ))}
+                  {businessAddress}
                 </p>
               </div>
             </div>

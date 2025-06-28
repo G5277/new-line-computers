@@ -2,7 +2,7 @@ import React from 'react';
 import { MessageCircle } from 'lucide-react';
 
 const WhatsAppWidget = () => {
-  const phoneNumber = import.meta.env.VITE_PHONE_NUMBER
+  const phoneNumber = import.meta.env.VITE_WHATSAPP_NUMBER
   const message = 'Hello! I would like to inquire about your services.';
 
   return (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { MapPin, Phone, Mail, Clock, MessageCircle, Navigation } from 'lucide-react';
 
 const Contact = () => {
@@ -68,12 +68,7 @@ const Contact = () => {
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-1">Address</h3>
                     <p className="text-gray-600">
-                      {businessAddress.split(', ').map((line, index, array) => (
-                        <span key={index}>
-                          {line}
-                          {index < array.length - 1 && <br />}
-                        </span>
-                      ))}
+                      {businessAddress}
                     </p>
                   </div>
                 </div>
@@ -148,12 +143,7 @@ const Contact = () => {
                     <MapPin className="h-16 w-16 text-blue-600 mx-auto mb-4" />
                     <p className="text-gray-600 font-medium">Interactive Google Maps</p>
                     <p className="text-sm text-gray-500 mt-2">
-                      {businessAddress.split(', ').map((line, index, array) => (
-                        <span key={index}>
-                          {line}
-                          {index < array.length - 1 && <br />}
-                        </span>
-                      ))}
+                      {businessAddress}
                     </p>
                     <a
                       href={googleMapsDirectionsUrl}
